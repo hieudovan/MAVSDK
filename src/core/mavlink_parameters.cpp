@@ -125,7 +125,7 @@ void MAVLinkParameters::cancel_all_param(const void* cookie)
     LockedQueue<WorkItem>::Guard work_queue_guard(_work_queue);
 
     for (auto item = _work_queue.begin(); item != _work_queue.end(); /* manual incrementation */) {
-        if (item->get()->cookie == cookie) {
+        if (item->cookie == cookie) {
             item = _work_queue.erase(item);
         } else {
             ++item;

@@ -54,13 +54,13 @@ TEST(LockedQueue, FillAndIterateAndErase)
     unsigned counter = 0;
     for (auto item : locked_queue) {
         ++counter;
-        EXPECT_EQ(*item, counter);
+        EXPECT_EQ(item, counter);
     }
     EXPECT_EQ(counter, 3);
 
     for (auto item = locked_queue.begin(); item != locked_queue.end();
          /* manual incrementation */) {
-        if (*item->get() == 2) {
+        if (*item == 2) {
             item = locked_queue.erase(item);
         } else {
             ++item;
@@ -73,9 +73,9 @@ TEST(LockedQueue, FillAndIterateAndErase)
     for (auto item : locked_queue) {
         ++counter;
         if (counter == 1) {
-            EXPECT_EQ(*item, 1);
+            EXPECT_EQ(item, 1);
         } else if (counter == 2) {
-            EXPECT_EQ(*item, 3);
+            EXPECT_EQ(item, 3);
         }
     }
 }

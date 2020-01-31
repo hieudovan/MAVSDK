@@ -11,10 +11,16 @@ public:
     LockedQueue(){};
     ~LockedQueue(){};
 
-    void push_back(T item)
+    void emplace_back(T&& item)
     {
         std::lock_guard<std::mutex> lock(_mutex);
-        _queue.push_back(std::make_shared<T>(item));
+        _queue.emplace_back(std::forward<T>(item));
+    }
+
+    void push_back(T& item)
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+        _queue.push_back(item);
     }
 
     size_t size()
@@ -23,7 +29,7 @@ public:
         return _queue.size();
     }
 
-    using iterator = typename std::deque<std::shared_ptr<T>>::iterator;
+    using iterator = typename std::deque<T>::iterator;
     iterator begin() { return _queue.begin(); }
 
     iterator end() { return _queue.end(); }
@@ -46,12 +52,12 @@ public:
         Guard& operator=(const Guard& other) = delete;
         Guard& operator=(Guard&& other) = delete;
 
-        std::shared_ptr<T> get_front()
+        T* get_front()
         {
             if (_locked_queue._queue.size() == 0) {
                 return nullptr;
             }
-            return _locked_queue._queue.front();
+            return &_locked_queue._queue.front();
         }
 
         void pop_front() { _locked_queue._queue.pop_front(); }
@@ -61,7 +67,7 @@ public:
     };
 
 private:
-    std::deque<std::shared_ptr<T>> _queue{};
+    std::deque<T> _queue{};
     std::mutex _mutex{};
 };
 
