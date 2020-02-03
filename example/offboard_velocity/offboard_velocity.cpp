@@ -201,6 +201,45 @@ bool offb_ctrl_attitude(std::shared_ptr<mavsdk::Offboard> offboard)
     return true;
 }
 
+/**
+ * Test off board .
+ *
+ * returns true if everything went well in Offboard control, exits with a log otherwise.
+ */
+bool offb_self_control (std::shared_ptr<mavsdk::Offboard> offboard)
+{
+    const std::string offb_mode = "ATTITUDE";
+
+    // Send it once before starting offboard, otherwise it will be rejected.
+    offboard->set_attitude({0.0f, 0.0f, 0.0f, 0.2f});
+
+    Offboard::Result offboard_result = offboard->start();
+    sleep_for(seconds(2)); // rolling
+    offboard_error_exit(offboard_result, "Offboard start failed");
+    // offboard_log(offb_mode, "Offboard started");
+
+    // offboard_log(offb_mode, "ROLL 30");
+    // offboard->set_attitude({30.0f, 0.0f, 0.0f, 0.6f});
+    // sleep_for(seconds(2)); // rolling
+
+    // offboard_log(offb_mode, "ROLL -30");
+    // offboard->set_attitude({-30.0f, 0.0f, 0.0f, 0.6f});
+    // sleep_for(seconds(2)); // Let yaw settle.
+
+    // offboard_log(offb_mode, "ROLL 0");
+    // offboard->set_attitude({0.0f, 0.0f, 0.0f, 0.6f});
+    // sleep_for(seconds(2)); // Let yaw settle.
+
+    // // Now, stop offboard mode.
+    // offboard_result = offboard->stop();
+    // offboard_error_exit(offboard_result, "Offboard stop failed: ");
+    // offboard_log(offb_mode, "Offboard stopped");
+
+    return true;
+}
+
+
+
 void usage(std::string bin_name)
 {
     std::cout << NORMAL_CONSOLE_TEXT << "Usage : " << bin_name << " <connection_url>" << std::endl
@@ -258,25 +297,40 @@ int main(int argc, char** argv)
     action_error_exit(takeoff_result, "Takeoff failed");
     std::cout << "In Air..." << std::endl;
     sleep_for(seconds(5));
-
+    std::string nextStep;
+    std::cout << "Enter 'next' for nextstep" << std::endl;
+    std::cin >> nextStep;
+    while (nextStep.compare("next") != 0)
+    {
+        std::cout << "reimport !!!" << std::endl;
+        std::cin >> nextStep;
+    }
     //  using attitude control
-    bool ret = offb_ctrl_attitude(offboard);
+    bool ret;
+    ret = offb_self_control(offboard);
+    // ret = offb_ctrl_attitude(offboard);
     if (ret == false) {
         return EXIT_FAILURE;
     }
 
     //  using local NED co-ordinates
-    ret = offb_ctrl_ned(offboard);
+    // ret = offb_ctrl_ned(offboard);
     if (ret == false) {
         return EXIT_FAILURE;
     }
 
     //  using body co-ordinates
-    ret = offb_ctrl_body(offboard);
+    // ret = offb_ctrl_body(offboard);
     if (ret == false) {
         return EXIT_FAILURE;
     }
-
+    std::cout << "Enter 'land' for end" << std::endl;
+    std::cin >> nextStep;
+    while (nextStep.compare("land") != 0)
+    {
+        std::cout << "reimport !!!" << std::endl;
+        std::cin >> nextStep;
+    }
     const Action::Result land_result = action->land();
     action_error_exit(land_result, "Landing failed");
 
